@@ -48,6 +48,7 @@ A lightweight, single-page web app that generates **beautiful color palettes (2�
 ├─ script.js
 └─ README.md
 
+
 ## Getting Started
 
 ### Run locally (quick)
