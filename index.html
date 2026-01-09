@@ -38,18 +38,41 @@
 			</header>
 
 			<div class="main-actions">
-				<button class="btn btn-primary" onclick="generateAesthetic()">
-					🎨 Generate New Aesthetic
-				</button>
+				<button class="btn btn-primary" onclick="generateAesthetic()">🎨 Generate New Aesthetic</button>
 				<button class="btn btn-secondary" onclick="unlockAll()">🔓 Unlock All</button>
-
-				<!-- NEW: Save current -->
 				<button class="btn btn-secondary" onclick="openSaveModal()">💾 Save</button>
 			</div>
 
 			<div class="content-grid">
 				<div class="panel">
-					<h2 class="panel-title">🎨 Color Palette</h2>
+					<!-- UPDATED: palette controls in the color panel header -->
+					<div class="panel-top">
+						<h2 class="panel-title">🎨 Color Palette</h2>
+
+						<div class="palette-controls">
+							<div class="control">
+								<label class="control-label" for="colorCount">Colors</label>
+								<select id="colorCount" class="select" aria-label="Number of colors">
+									<option value="2">2</option>
+									<option value="3" selected>3</option>
+									<option value="4">4</option>
+									<option value="5">5</option>
+									<option value="6">6</option>
+								</select>
+							</div>
+
+							<div class="control">
+								<label class="control-label" for="seedColor">Start</label>
+								<div class="seed-row">
+									<input id="seedColor" class="color-input" type="color" value="#6366f1" />
+									<button class="btn btn-mini" onclick="useSeedAsFirstSwatch()">
+										Use as first swatch
+									</button>
+								</div>
+							</div>
+						</div>
+					</div>
+
 					<div id="colorPalette"></div>
 				</div>
 
@@ -58,7 +81,6 @@
 					<div id="fontPairing"></div>
 				</div>
 
-				<!-- NEW: Saved library -->
 				<div class="panel saved-panel">
 					<div class="saved-header">
 						<h2 class="panel-title">⭐ Saved Aesthetics</h2>
@@ -98,7 +120,7 @@
 
 		<div class="copy-feedback" id="copyFeedback">Copied to clipboard!</div>
 
-		<!-- NEW: Save modal -->
+		<!-- Save modal -->
 		<div class="modal-backdrop" id="saveModalBackdrop" aria-hidden="true">
 			<div class="modal" role="dialog" aria-modal="true" aria-labelledby="saveModalTitle">
 				<div class="modal-header">
@@ -115,9 +137,9 @@
 						placeholder="e.g., Midnight Lavender"
 						autocomplete="off"
 					/>
-
 					<p class="hint">
-						This will save your current <strong>colors</strong> + <strong>fonts</strong>.
+						Saves your current <strong>palette (2–6 colors)</strong>, <strong>background/text</strong>, and
+						<strong>fonts</strong>.
 					</p>
 				</div>
 
