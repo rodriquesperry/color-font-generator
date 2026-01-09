@@ -30,12 +30,46 @@ let currentAesthetic = {
 // Initialize with loaded fonts
 let loadedFonts = new Set(['Inter']);
 
-// Color generation using HSL for better harmony
-function generateHarmoniousColor(baseHue, variation, saturation, lightness) {
-	const hue = (baseHue + variation) % 360;
-	return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+// --- Theme toggle ---
+function setTheme(theme) {
+	document.documentElement.setAttribute('data-theme', theme);
+
+	const toggle = document.getElementById('themeToggle');
+	if (toggle) toggle.checked = theme === 'dark';
+
+	const icon = document.querySelector('.theme-icon');
+	if (icon) icon.textContent = theme === 'dark' ? '🌙' : '☀️';
+
+	try {
+		localStorage.setItem('theme', theme);
+	} catch {
+		// ignore (private mode / blocked storage)
+	}
 }
 
+function initThemeToggle() {
+	const saved = (() => {
+		try {
+			return localStorage.getItem('theme');
+		} catch {
+			return null;
+		}
+	})();
+
+	const prefersDark =
+		window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+	setTheme(saved || (prefersDark ? 'dark' : 'light'));
+
+	const toggle = document.getElementById('themeToggle');
+	if (toggle) {
+		toggle.addEventListener('change', (e) => {
+			setTheme(e.target.checked ? 'dark' : 'light');
+		});
+	}
+}
+
+// Color generation using HSL for better harmony
 function hslToHex(h, s, l) {
 	l /= 100;
 	const a = (s * Math.min(l, 1 - l)) / 100;
@@ -50,21 +84,13 @@ function hslToHex(h, s, l) {
 }
 
 function generateColorPalette() {
-	// Generate base hue for color harmony
 	const baseHue = Math.floor(Math.random() * 360);
-
-	// Use analogous or complementary color schemes
 	const scheme = Math.random() > 0.5 ? 'analogous' : 'complementary';
 
 	let colors = {};
 
 	if (scheme === 'analogous') {
-		// Colors close to each other on the color wheel
-		colors.primary = hslToHex(
-			baseHue,
-			70 + Math.random() * 20,
-			50 + Math.random() * 10
-		);
+		colors.primary = hslToHex(baseHue, 70 + Math.random() * 20, 50 + Math.random() * 10);
 		colors.secondary = hslToHex(
 			(baseHue + 30) % 360,
 			65 + Math.random() * 20,
@@ -76,12 +102,7 @@ function generateColorPalette() {
 			45 + Math.random() * 15
 		);
 	} else {
-		// Complementary colors (opposite on color wheel)
-		colors.primary = hslToHex(
-			baseHue,
-			70 + Math.random() * 20,
-			50 + Math.random() * 10
-		);
+		colors.primary = hslToHex(baseHue, 70 + Math.random() * 20, 50 + Math.random() * 10);
 		colors.secondary = hslToHex(
 			(baseHue + 180) % 360,
 			65 + Math.random() * 20,
@@ -94,7 +115,6 @@ function generateColorPalette() {
 		);
 	}
 
-	// Generate neutral background and text colors
 	const bgLightness = 90 + Math.random() * 8;
 	const textLightness = 10 + Math.random() * 15;
 
@@ -128,7 +148,6 @@ function getContrastRatio(hex1, hex2) {
 }
 
 function getContrastBadge(ratio) {
-	// WCAG AA requires 4.5:1 for normal text, 3:1 for large text
 	if (ratio >= 4.5) {
 		return '<span class="contrast-badge contrast-good">AAA ✓</span>';
 	} else if (ratio >= 3) {
@@ -198,33 +217,26 @@ function renderAesthetic() {
 
 			let contrastBadge = '';
 			if (key === 'text') {
-				const ratio = getContrastRatio(
-					color,
-					currentAesthetic.colors.background
-				);
+				const ratio = getContrastRatio(color, currentAesthetic.colors.background);
 				contrastBadge = getContrastBadge(ratio);
 			}
 
 			return `
-                    <div class="color-item">
-                        <div class="color-swatch" style="background: ${color}"></div>
-                        <div class="color-info">
-                            <div class="color-label">${colorLabels[key]}</div>
-                            <div class="color-value">${color.toUpperCase()}</div>
-                            ${contrastBadge}
-                        </div>
-                        <div class="item-actions">
-                            <button class="icon-btn" onclick="copyToClipboard('${color}')" title="Copy">
-                                📋
-                            </button>
-                            <button class="icon-btn ${
-															isLocked ? 'locked' : ''
-														}" onclick="toggleLock('${key}')" title="Lock">
-                                ${lockIcon}
-                            </button>
-                        </div>
-                    </div>
-                `;
+        <div class="color-item">
+          <div class="color-swatch" style="background: ${color}"></div>
+          <div class="color-info">
+            <div class="color-label">${colorLabels[key]}</div>
+            <div class="color-value">${color.toUpperCase()}</div>
+            ${contrastBadge}
+          </div>
+          <div class="item-actions">
+            <button class="icon-btn" onclick="copyToClipboard('${color}')" title="Copy">📋</button>
+            <button class="icon-btn ${isLocked ? 'locked' : ''}" onclick="toggleLock('${key}')" title="Lock">
+              ${lockIcon}
+            </button>
+          </div>
+        </div>
+      `;
 		})
 		.join('');
 
@@ -242,24 +254,20 @@ function renderAesthetic() {
 			const lockIcon = isLocked ? '🔒' : '🔓';
 
 			return `
-                    <div class="font-item">
-                        <div class="font-preview" style="font-family: '${font}', sans-serif">Aa</div>
-                        <div class="font-info">
-                            <div class="font-label">${fontLabels[key]}</div>
-                            <div class="font-value">${font}</div>
-                        </div>
-                        <div class="item-actions">
-                            <button class="icon-btn" onclick="copyToClipboard('${font}')" title="Copy">
-                                📋
-                            </button>
-                            <button class="icon-btn ${
-															isLocked ? 'locked' : ''
-														}" onclick="toggleLock('${key}')" title="Lock">
-                                ${lockIcon}
-                            </button>
-                        </div>
-                    </div>
-                `;
+        <div class="font-item">
+          <div class="font-preview" style="font-family: '${font}', sans-serif">Aa</div>
+          <div class="font-info">
+            <div class="font-label">${fontLabels[key]}</div>
+            <div class="font-value">${font}</div>
+          </div>
+          <div class="item-actions">
+            <button class="icon-btn" onclick="copyToClipboard('${font}')" title="Copy">📋</button>
+            <button class="icon-btn ${isLocked ? 'locked' : ''}" onclick="toggleLock('${key}')" title="Lock">
+              ${lockIcon}
+            </button>
+          </div>
+        </div>
+      `;
 		})
 		.join('');
 
@@ -282,7 +290,6 @@ function renderAesthetic() {
 }
 
 function generateAesthetic() {
-	// Generate new colors (respecting locks)
 	const newColors = generateColorPalette();
 	Object.keys(newColors).forEach((key) => {
 		if (!currentAesthetic.locked[key]) {
@@ -290,17 +297,15 @@ function generateAesthetic() {
 		}
 	});
 
-	// Generate new fonts (respecting locks)
 	const newFonts = generateFonts();
-	if (!currentAesthetic.locked.heading) {
-		currentAesthetic.fonts.heading = newFonts.heading;
-	}
-	if (!currentAesthetic.locked.body) {
-		currentAesthetic.fonts.body = newFonts.body;
-	}
+	if (!currentAesthetic.locked.heading) currentAesthetic.fonts.heading = newFonts.heading;
+	if (!currentAesthetic.locked.body) currentAesthetic.fonts.body = newFonts.body;
 
 	renderAesthetic();
 }
 
 // Initialize on load
-generateAesthetic();
+document.addEventListener('DOMContentLoaded', () => {
+	initThemeToggle();
+	generateAesthetic();
+});
