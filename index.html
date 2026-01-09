@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Aesthetic Generator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Random Aesthetic Generator</h1>
+            <p class="subtitle">Generate beautiful color palettes and font pairings for your next project</p>
+        </header>
+
+        <div class="main-actions">
+            <button class="btn btn-primary" onclick="generateAesthetic()">
+                🎨 Generate New Aesthetic
+            </button>
+            <button class="btn btn-secondary" onclick="unlockAll()">
+                🔓 Unlock All
+            </button>
+        </div>
+
+        <div class="content-grid">
+            <div class="panel">
+                <h2 class="panel-title">🎨 Color Palette</h2>
+                <div id="colorPalette"></div>
+            </div>
+
+            <div class="panel">
+                <h2 class="panel-title">✏️ Font Pairing</h2>
+                <div id="fontPairing"></div>
+            </div>
+
+            <div class="panel preview-panel">
+                <h2 class="panel-title">👁️ Live Preview</h2>
+                <div class="preview-content" id="preview">
+                    <h3 class="preview-heading">Your Amazing Headline</h3>
+                    <p class="preview-text">This is how your text will look with the generated aesthetic. The combination of colors and fonts creates a unique visual identity that can be used across your project for a cohesive and professional appearance.</p>
+                    <button class="preview-button">Call to Action</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="copy-feedback" id="copyFeedback">Copied to clipboard!</div>
+
+    <script src="script.js"></script>
+</body>
+</html>
