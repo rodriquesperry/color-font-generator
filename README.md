@@ -40,12 +40,14 @@ A lightweight, single-page web app that generates **beautiful color palettes (2�
 - 📋 Copy any saved aesthetic as JSON
 
 ## Project Structure
-'''
+
+```text
+.
 ├─ index.html
 ├─ styles.css
 ├─ script.js
 └─ README.md
-'''
+
 ## Getting Started
 
 ### Run locally (quick)
