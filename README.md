@@ -39,17 +39,13 @@ A lightweight, single-page web app that generates **beautiful color palettes (2�
 - 🗑️ Delete one or clear all
 - 📋 Copy any saved aesthetic as JSON
 
----
-
 ## Project Structure
+'''
 ├─ index.html
 ├─ styles.css
 ├─ script.js
 └─ README.md
-
-
----
-
+'''
 ## Getting Started
 
 ### Run locally (quick)
