@@ -39,16 +39,6 @@ A lightweight, single-page web app that generates **beautiful color palettes (2�
 - 🗑️ Delete one or clear all
 - 📋 Copy any saved aesthetic as JSON
 
-## Project Structure
-
-```text
-.
-├─ index.html
-├─ styles.css
-├─ script.js
-└─ README.md
-
-
 ## Getting Started
 
 ### Run locally (quick)
@@ -214,3 +204,12 @@ Encode palette into URL for shareable links
 ## License
 
 No license included by default. If you want this to be open-source friendly, consider adding an MIT License.
+
+## Project Structure
+
+```text
+.
+├─ index.html
+├─ styles.css
+├─ script.js
+└─ README.md
