@@ -12,7 +12,9 @@ const fontPairs = [
 	{ heading: 'DM Serif Display', body: 'DM Sans' },
 ];
 
+// --------------------
 // State management
+// --------------------
 let currentAesthetic = {
 	colors: {},
 	fonts: {},
@@ -27,10 +29,11 @@ let currentAesthetic = {
 	},
 };
 
-// Initialize with loaded fonts
 let loadedFonts = new Set(['Inter']);
 
-// --- Theme toggle ---
+// --------------------
+// Theme toggle
+// --------------------
 function setTheme(theme) {
 	document.documentElement.setAttribute('data-theme', theme);
 
@@ -42,9 +45,7 @@ function setTheme(theme) {
 
 	try {
 		localStorage.setItem('theme', theme);
-	} catch {
-		// ignore (private mode / blocked storage)
-	}
+	} catch {}
 }
 
 function initThemeToggle() {
@@ -69,7 +70,38 @@ function initThemeToggle() {
 	}
 }
 
-// Color generation using HSL for better harmony
+// --------------------
+// Helpers
+// --------------------
+function showToast(message) {
+	const feedback = document.getElementById('copyFeedback');
+	feedback.textContent = message;
+	feedback.classList.add('show');
+	setTimeout(() => feedback.classList.remove('show'), 2000);
+}
+
+function copyToClipboard(text) {
+	navigator.clipboard.writeText(text).then(() => {
+		showToast(`Copied: ${text}`);
+	});
+}
+
+function loadGoogleFont(fontName) {
+	if (!fontName || loadedFonts.has(fontName)) return;
+
+	const link = document.createElement('link');
+	link.href = `https://fonts.googleapis.com/css2?family=${fontName.replace(
+		' ',
+		'+'
+	)}:wght@400;600;700&display=swap`;
+	link.rel = 'stylesheet';
+	document.head.appendChild(link);
+	loadedFonts.add(fontName);
+}
+
+// --------------------
+// Color generation
+// --------------------
 function hslToHex(h, s, l) {
 	l /= 100;
 	const a = (s * Math.min(l, 1 - l)) / 100;
@@ -124,7 +156,7 @@ function generateColorPalette() {
 	return colors;
 }
 
-// Calculate relative luminance for WCAG contrast
+// WCAG contrast
 function getLuminance(hex) {
 	const rgb = parseInt(hex.slice(1), 16);
 	const r = (rgb >> 16) & 0xff;
@@ -148,28 +180,14 @@ function getContrastRatio(hex1, hex2) {
 }
 
 function getContrastBadge(ratio) {
-	if (ratio >= 4.5) {
-		return '<span class="contrast-badge contrast-good">AAA ✓</span>';
-	} else if (ratio >= 3) {
-		return '<span class="contrast-badge contrast-good">AA ✓</span>';
-	} else {
-		return '<span class="contrast-badge contrast-poor">Poor ✗</span>';
-	}
+	if (ratio >= 4.5) return '<span class="contrast-badge contrast-good">AAA ✓</span>';
+	if (ratio >= 3) return '<span class="contrast-badge contrast-good">AA ✓</span>';
+	return '<span class="contrast-badge contrast-poor">Poor ✗</span>';
 }
 
-function loadGoogleFont(fontName) {
-	if (loadedFonts.has(fontName)) return;
-
-	const link = document.createElement('link');
-	link.href = `https://fonts.googleapis.com/css2?family=${fontName.replace(
-		' ',
-		'+'
-	)}:wght@400;600;700&display=swap`;
-	link.rel = 'stylesheet';
-	document.head.appendChild(link);
-	loadedFonts.add(fontName);
-}
-
+// --------------------
+// Fonts
+// --------------------
 function generateFonts() {
 	const pair = fontPairs[Math.floor(Math.random() * fontPairs.length)];
 	loadGoogleFont(pair.heading);
@@ -177,15 +195,9 @@ function generateFonts() {
 	return pair;
 }
 
-function copyToClipboard(text) {
-	navigator.clipboard.writeText(text).then(() => {
-		const feedback = document.getElementById('copyFeedback');
-		feedback.textContent = `Copied: ${text}`;
-		feedback.classList.add('show');
-		setTimeout(() => feedback.classList.remove('show'), 2000);
-	});
-}
-
+// --------------------
+// Locks
+// --------------------
 function toggleLock(type) {
 	currentAesthetic.locked[type] = !currentAesthetic.locked[type];
 	renderAesthetic();
@@ -198,6 +210,9 @@ function unlockAll() {
 	renderAesthetic();
 }
 
+// --------------------
+// Render
+// --------------------
 function renderAesthetic() {
 	// Render colors
 	const colorPalette = document.getElementById('colorPalette');
@@ -289,6 +304,9 @@ function renderAesthetic() {
 	button.style.fontFamily = `'${currentAesthetic.fonts.body}', sans-serif`;
 }
 
+// --------------------
+// Generate
+// --------------------
 function generateAesthetic() {
 	const newColors = generateColorPalette();
 	Object.keys(newColors).forEach((key) => {
@@ -304,8 +322,204 @@ function generateAesthetic() {
 	renderAesthetic();
 }
 
-// Initialize on load
+// =====================================================
+// ✅ SAVING / LOADING (localStorage)
+// =====================================================
+const STORAGE_KEY = 'rag_saved_aesthetics_v1';
+
+function getSaved() {
+	try {
+		const raw = localStorage.getItem(STORAGE_KEY);
+		return raw ? JSON.parse(raw) : [];
+	} catch {
+		return [];
+	}
+}
+
+function setSaved(items) {
+	try {
+		localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+	} catch {}
+}
+
+function createId() {
+	return `${Date.now()}_${Math.random().toString(16).slice(2)}`;
+}
+
+function openSaveModal() {
+	const backdrop = document.getElementById('saveModalBackdrop');
+	const input = document.getElementById('saveName');
+
+	backdrop.classList.add('show');
+	backdrop.setAttribute('aria-hidden', 'false');
+
+	// Default name suggestion
+	const h = currentAesthetic.fonts.heading || 'Heading';
+	const b = currentAesthetic.fonts.body || 'Body';
+	input.value = `${h} + ${b}`;
+	setTimeout(() => input.focus(), 0);
+}
+
+function closeSaveModal() {
+	const backdrop = document.getElementById('saveModalBackdrop');
+	backdrop.classList.remove('show');
+	backdrop.setAttribute('aria-hidden', 'true');
+}
+
+function saveCurrentAesthetic() {
+	const nameInput = document.getElementById('saveName');
+	const name = (nameInput.value || '').trim();
+
+	if (!name) {
+		showToast('Please enter a name to save.');
+		return;
+	}
+
+	// Snapshot current aesthetic (colors + fonts only)
+	const snapshot = {
+		id: createId(),
+		name,
+		createdAt: new Date().toISOString(),
+		colors: { ...currentAesthetic.colors },
+		fonts: { ...currentAesthetic.fonts },
+	};
+
+	const saved = getSaved();
+	saved.unshift(snapshot);
+	setSaved(saved);
+
+	closeSaveModal();
+	renderSavedList();
+	showToast(`Saved: ${name}`);
+}
+
+function applySaved(id) {
+	const saved = getSaved();
+	const item = saved.find((x) => x.id === id);
+	if (!item) return;
+
+	// Load required fonts
+	loadGoogleFont(item.fonts.heading);
+	loadGoogleFont(item.fonts.body);
+
+	// Apply without touching locks
+	currentAesthetic.colors = { ...item.colors };
+	currentAesthetic.fonts = { ...item.fonts };
+
+	renderAesthetic();
+	showToast(`Applied: ${item.name}`);
+}
+
+function deleteSaved(id) {
+	const saved = getSaved();
+	const next = saved.filter((x) => x.id !== id);
+	setSaved(next);
+	renderSavedList();
+	showToast('Deleted saved aesthetic');
+}
+
+function clearAllSaved() {
+	setSaved([]);
+	renderSavedList();
+	showToast('Cleared all saved aesthetics');
+}
+
+function exportSaved(id) {
+	const saved = getSaved();
+	const item = saved.find((x) => x.id === id);
+	if (!item) return;
+
+	const json = JSON.stringify(
+		{
+			name: item.name,
+			colors: item.colors,
+			fonts: item.fonts,
+		},
+		null,
+		2
+	);
+
+	copyToClipboard(json);
+	showToast('Saved aesthetic copied as JSON');
+}
+
+function renderSavedList() {
+	const listEl = document.getElementById('savedList');
+	const emptyEl = document.getElementById('savedEmpty');
+	const searchEl = document.getElementById('savedSearch');
+
+	const query = (searchEl?.value || '').trim().toLowerCase();
+	const saved = getSaved();
+
+	const filtered = query
+		? saved.filter((x) => x.name.toLowerCase().includes(query))
+		: saved;
+
+	listEl.innerHTML = filtered
+		.map((item) => {
+			const swatches = ['primary', 'secondary', 'accent', 'background', 'text']
+				.map((k) => `<div class="saved-swatch" style="background:${item.colors[k]}"></div>`)
+				.join('');
+
+			const meta = `${item.fonts.heading} • ${item.fonts.body}`;
+
+			return `
+				<div class="saved-card">
+					<div class="saved-top">
+						<div>
+							<div class="saved-name">${escapeHtml(item.name)}</div>
+							<div class="saved-meta">${escapeHtml(meta)}</div>
+						</div>
+						<div class="saved-swatches">${swatches}</div>
+					</div>
+
+					<div class="saved-actions">
+						<button class="btn-mini" onclick="applySaved('${item.id}')">Apply</button>
+						<button class="btn-mini" onclick="exportSaved('${item.id}')">Copy JSON</button>
+						<button class="btn-mini" onclick="deleteSaved('${item.id}')">Delete</button>
+					</div>
+				</div>
+			`;
+		})
+		.join('');
+
+	const hasAny = getSaved().length > 0;
+	emptyEl.style.display = hasAny ? 'none' : 'block';
+}
+
+function escapeHtml(str) {
+	return String(str)
+		.replaceAll('&', '&amp;')
+		.replaceAll('<', '&lt;')
+		.replaceAll('>', '&gt;')
+		.replaceAll('"', '&quot;')
+		.replaceAll("'", '&#039;');
+}
+
+// Close modal on backdrop click + ESC
+function initModalBehavior() {
+	const backdrop = document.getElementById('saveModalBackdrop');
+	backdrop.addEventListener('click', (e) => {
+		if (e.target === backdrop) closeSaveModal();
+	});
+
+	document.addEventListener('keydown', (e) => {
+		if (e.key === 'Escape') closeSaveModal();
+	});
+}
+
+// --------------------
+// Init
+// --------------------
 document.addEventListener('DOMContentLoaded', () => {
 	initThemeToggle();
+	initModalBehavior();
+
+	// Saved search
+	const searchEl = document.getElementById('savedSearch');
+	if (searchEl) searchEl.addEventListener('input', renderSavedList);
+
+	// Initial render
 	generateAesthetic();
+	renderSavedList();
 });

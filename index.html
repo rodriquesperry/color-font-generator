@@ -42,6 +42,9 @@
 					🎨 Generate New Aesthetic
 				</button>
 				<button class="btn btn-secondary" onclick="unlockAll()">🔓 Unlock All</button>
+
+				<!-- NEW: Save current -->
+				<button class="btn btn-secondary" onclick="openSaveModal()">💾 Save</button>
 			</div>
 
 			<div class="content-grid">
@@ -53,6 +56,29 @@
 				<div class="panel">
 					<h2 class="panel-title">✏️ Font Pairing</h2>
 					<div id="fontPairing"></div>
+				</div>
+
+				<!-- NEW: Saved library -->
+				<div class="panel saved-panel">
+					<div class="saved-header">
+						<h2 class="panel-title">⭐ Saved Aesthetics</h2>
+						<button class="btn btn-mini" onclick="clearAllSaved()" title="Clear all saved">
+							Clear
+						</button>
+					</div>
+
+					<div class="saved-controls">
+						<input
+							id="savedSearch"
+							class="input"
+							type="text"
+							placeholder="Search saved…"
+							autocomplete="off"
+						/>
+					</div>
+
+					<div id="savedList" class="saved-list"></div>
+					<p id="savedEmpty" class="saved-empty">No saved aesthetics yet. Hit 💾 Save!</p>
 				</div>
 
 				<div class="panel preview-panel">
@@ -71,6 +97,36 @@
 		</div>
 
 		<div class="copy-feedback" id="copyFeedback">Copied to clipboard!</div>
+
+		<!-- NEW: Save modal -->
+		<div class="modal-backdrop" id="saveModalBackdrop" aria-hidden="true">
+			<div class="modal" role="dialog" aria-modal="true" aria-labelledby="saveModalTitle">
+				<div class="modal-header">
+					<h3 id="saveModalTitle" class="modal-title">Save Aesthetic</h3>
+					<button class="icon-btn" onclick="closeSaveModal()" title="Close">✕</button>
+				</div>
+
+				<div class="modal-body">
+					<label class="label" for="saveName">Name</label>
+					<input
+						id="saveName"
+						class="input"
+						type="text"
+						placeholder="e.g., Midnight Lavender"
+						autocomplete="off"
+					/>
+
+					<p class="hint">
+						This will save your current <strong>colors</strong> + <strong>fonts</strong>.
+					</p>
+				</div>
+
+				<div class="modal-actions">
+					<button class="btn btn-secondary" onclick="closeSaveModal()">Cancel</button>
+					<button class="btn btn-primary" onclick="saveCurrentAesthetic()">Save</button>
+				</div>
+			</div>
+		</div>
 
 		<script src="./script.js"></script>
 	</body>
